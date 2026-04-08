@@ -1,0 +1,125 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users/{uid}
+    // Fields:
+    //   - uid: string (required) - Firebase Auth UID
+    //   - email: string (required, email format) - User's email
+    //   - is2FAEnabled: bool (optional) - 2FA status
+    //   - twoFASecret: string (optional) - 2FA secret
+    //   - createdAt: timestamp (optional) - Creation time
+    //
+    // Collection: users/{uid}/wallets/{walletId}
+    // Fields:
+    //   - address: string (required) - Wallet address
+    //   - label: string (optional) - Wallet label
+    //   - ownerUid: string (required) - Owner's UID
+    //   - createdAt: timestamp (optional) - Creation time
+    //
+    // Collection: users/{uid}/transactions/{txId}
+    // Fields:
+    //   - hash: string (required) - Transaction hash
+    //   - from: string (required) - Sender address
+    //   - to: string (required) - Receiver address
+    //   - amount: string (required) - Amount in ETH
+    //   - symbol: string (optional) - Token symbol
+    //   - status: string (optional, enum) - Transaction status
+    //   - ownerUid: string (required) - Owner's UID
+    //   - timestamp: timestamp (optional) - Transaction time
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "divama620@gmail.com" && request.auth.token.email_verified == true)); // Default admin
+    }
+
+    function isValidEmail(email) {
+      return email is string &&
+        email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasOnlyAllowedFields(['uid', 'email', 'is2FAEnabled', 'twoFASecret', 'createdAt', 'role']) &&
+             data.uid is string && data.uid == request.auth.uid &&
+             data.email is string && isValidEmail(data.email) &&
+             (!('is2FAEnabled' in data) || data.is2FAEnabled is bool) &&
+             (!('twoFASecret' in data) || (data.twoFASecret is string && data.twoFASecret.size() < 100)) &&
+             (!('createdAt' in data) || data.createdAt is timestamp);
+    }
+
+    function isValidWallet(data) {
+      return hasOnlyAllowedFields(['address', 'label', 'ownerUid', 'createdAt']) &&
+             data.address is string && data.address.size() == 42 &&
+             (!('label' in data) || (data.label is string && data.label.size() < 50)) &&
+             data.ownerUid is string && data.ownerUid == request.auth.uid &&
+             (!('createdAt' in data) || data.createdAt is timestamp);
+    }
+
+    function isValidTransaction(data) {
+      return hasOnlyAllowedFields(['hash', 'from', 'to', 'amount', 'symbol', 'status', 'ownerUid', 'timestamp']) &&
+             data.hash is string && data.hash.size() == 66 &&
+             data.from is string && data.from.size() == 42 &&
+             data.to is string && data.to.size() == 42 &&
+             data.amount is string && data.amount.size() < 30 &&
+             (!('symbol' in data) || (data.symbol is string && data.symbol.size() < 10)) &&
+             (!('status' in data) || data.status in ['pending', 'confirmed', 'failed']) &&
+             data.ownerUid is string && data.ownerUid == request.auth.uid &&
+             (!('timestamp' in data) || data.timestamp is timestamp);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isAuthenticated() && isValidUser(request.resource.data) && (isOwner(uid) || isAdmin());
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && (isOwner(uid) || isAdmin());
+      
+      match /wallets/{walletId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isValidWallet(request.resource.data);
+        allow update: if isOwner(uid) && isValidWallet(request.resource.data);
+        allow delete: if isOwner(uid);
+      }
+
+      match /transactions/{txId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isValidTransaction(request.resource.data);
+        allow update: if isOwner(uid) && isValidTransaction(request.resource.data);
+        allow delete: if isOwner(uid);
+      }
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

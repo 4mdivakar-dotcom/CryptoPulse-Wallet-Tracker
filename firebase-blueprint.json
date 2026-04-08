@@ -1,0 +1,59 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stores user preferences, 2FA status, and wallet metadata.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email" },
+        "is2FAEnabled": { "type": "boolean" },
+        "twoFASecret": { "type": "string", "description": "Encrypted or secure 2FA secret" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Wallet": {
+      "title": "Wallet",
+      "description": "Metadata for wallets associated with a user.",
+      "type": "object",
+      "properties": {
+        "address": { "type": "string" },
+        "label": { "type": "string" },
+        "ownerUid": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["address", "ownerUid"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "History of crypto transactions.",
+      "type": "object",
+      "properties": {
+        "hash": { "type": "string" },
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "amount": { "type": "string" },
+        "symbol": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "failed"] },
+        "ownerUid": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["hash", "from", "to", "amount", "ownerUid"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "User",
+      "description": "User profile document"
+    },
+    "/users/{uid}/wallets/{walletId}": {
+      "schema": "Wallet",
+      "description": "User's saved wallets"
+    },
+    "/users/{uid}/transactions/{txId}": {
+      "schema": "Transaction",
+      "description": "User's transaction history"
+    }
+  }
+}

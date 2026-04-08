@@ -1,0 +1,5 @@
+{
+  "name": "CryptoPulse Wallet & Tracker",
+  "description": "A secure cryptocurrency wallet and transaction tracker with real-time price updates, 2FA, and on-chain analysis.",
+  "requestFramePermissions": []
+}
