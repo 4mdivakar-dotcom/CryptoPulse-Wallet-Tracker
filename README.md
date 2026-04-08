@@ -1,20 +1,39 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+Key Features
+1. Market Insights & Snapshot (April 2026)
+April 2026 Market Snapshot: Bitcoin ($70k support), Ethereum RWA growth ($27.1B), aur AI Agent narratives (TAO, FET, RENDER) ka curated view.
 
-# Run and deploy your AI Studio app
+Dynamic News Feed: Shimmer skeleton loaders aur manual refresh features ke saath optimized market news.
 
-This contains everything you need to run your app locally.
+Institutional Tracker: CLARITY Act ke context mein BNB aur XRP jaise assets ki monitoring.
+
+2. On-Chain Analysis
+Whale Tracking: Kisi bhi high-activity wallet address ka deep-dive transaction analysis.
+
+Moralis Integration: Robust address checksumming aur error handling (400 errors resolved) ke saath seamless blockchain data retrieval.
+
+3. Pro Dashboard
+Performance Optimized: Lightning-fast components jo real-time mein environment variables aur API data fetch karte hain.
+
+Visual Design: Dark-mode optimized, high-contrast interface jisme custom icons (Target, Landmark, Cpu) ka use kiya gaya hai.
+
+🛠 Tech Stack
+Frontend: React.js / Next.js (TypeScript)
+
+Styling: Tailwind CSS (Professional Dark Theme)
+
+Blockchain Data: Moralis API
 
 
+git clone https://github.com/your-username/cryptopulse-tracker.git
+cd cryptopulse-tracker
 
-## Run Locally
+npm install
+npm install
 
-**Prerequisites:**  Node.js
+
+State Management: React Hooks & Context API
+
+Icons: Lucide-react / Custom SVG Icons
 
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+npm run dev
