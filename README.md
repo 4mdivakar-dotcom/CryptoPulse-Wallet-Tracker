@@ -24,7 +24,7 @@ Styling: Tailwind CSS (Professional Dark Theme)
 Blockchain Data: Moralis API
 
 
-git clone https://github.com/your-username/cryptopulse-tracker.git
+
 cd cryptopulse-tracker
 
 npm install
